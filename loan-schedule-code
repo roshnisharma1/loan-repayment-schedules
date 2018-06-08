@@ -1,0 +1,226 @@
+// Program by: Roshni Sharma
+ 
+#include<iostream>
+#include<iomanip>
+#include<string>
+#include<cmath>
+#include<fstream>
+ 
+using namespace std;
+ 
+ 
+// Function prototypes
+void printDescription();
+void calculateValues(double, double, double, ofstream &);
+ 
+ 
+// Function main to read in file
+int main()
+{
+    // Define the variables
+    string inputFileName, outputFileName;   // Entered in by user
+    int countOfItems;                       // Count of items in input file
+     
+    // Call the function to introduce user to program
+    printDescription();
+     
+    // File stream objects
+    ifstream inFile;
+    ofstream outFile;
+     
+    // Prompt the user to enter the input & output file names
+    cout << "Enter the name of your input file name: ";
+    cin >> inputFileName;
+    cout << "\nThe user entered the input file name " << inputFileName << ".";
+    cout << "\n\nEnter the name of your output file name: ";
+    cin >> outputFileName;
+    cout << "\nThe user entered the output file name " << outputFileName << ".";
+     
+    // Open the file to read
+    inFile.open(inputFileName.c_str());
+     
+    // If the input file doesn't open...
+    if(!inFile)
+    {
+        cout << "\n\nError: Unable to open file for reading.\nQuitting program now.\n\n";
+        return 1;
+    }
+     
+    // If the input file does open...
+    else
+    {
+        cout << "\n\nReading the file now.\n\n";
+         
+        // Open the file to write
+        outFile.open(outputFileName.c_str());
+         
+        // If the output file doesn't open...
+        if(!outFile)
+        {
+            cout << "\n\nError: Unable to open file for writing.\nQuitting program now.\n\n";
+            return 2;
+        }
+         
+        // If the output file does open...
+        else
+        {
+            // Set first number in file as sentinel
+            countOfItems = -23428;
+             
+            // Read the first value
+            inFile >> countOfItems;
+            cout << "This number was just read from the file " << inputFileName << ": " << countOfItems << endl;
+            outFile << "This number was just read from the file " << inputFileName << ": " << countOfItems << endl;
+             
+            cout << "\nHere are your loan repayment schedule(s):" << endl;
+            cout << "\n*****************************************************\n\n";
+            outFile << "\nHere are your loan repayment schedule(s):" << endl;
+            outFile << "\n*****************************************************\n\n";
+             
+             
+            // Read the rest of the values
+            for (int i=0; i<countOfItems; i++)
+            {
+                // Define variables for rest of values
+                double input1, input2, input3;
+                 
+                // Read the values
+                inFile >> input1;
+                inFile >> input2;
+                inFile >> input3;
+                 
+                // Call the function to perform calculations
+                calculateValues(input1, input2, input3, outFile);
+            }
+                 
+            // Close files
+            inFile.close();
+            outFile.close();
+             
+            // Display exit message
+            cout << "\n\nYour loan repayment schedule(s) have been written to an output file." << endl << endl;
+            cout << "All files are now closed. Goodbye.\n\n";
+        }
+         
+         
+    }
+     
+     
+     
+    return 0;
+     
+}
+ 
+ 
+// Function to print description
+void printDescription()
+{
+    cout << "*****************************************************\n";
+    cout << "This program will create loan repayment schedule(s)\n";
+    cout << "based upon values in a text file. You can send the\n";
+    cout << "information to the program through an input file and\n";
+    cout << "write the schedule(s) onto an output file as well.\n";
+    cout << "*****************************************************\n\n";
+ 
+    return;
+}
+ 
+ 
+// Function to calculate values
+void calculateValues(double balance, double annualRate, double paymentPerMonth, ofstream & outFile)
+{
+    // Define the variables
+    double monthlyRate, monthlyInterest, principal;
+    int n = 1;                      // Counter for payment number
+    double totalInterest = 0;       // Accumulator for interst
+ 
+    // Write first three values to screen
+    cout << endl;
+    cout << "Performing calculations on the values " << balance << ", " << annualRate << ", and " << paymentPerMonth << ".\n\n";
+    cout << "Starting Balance: $" << balance << endl;
+    cout << "Annual Interest Rate: " << annualRate << endl;
+    cout << "Monthly Payment: $" << paymentPerMonth << endl << endl;
+     
+    // Write first three values to output file
+    outFile << endl << endl;
+    outFile << "Performing calculations on the values " << balance << ", " << annualRate << ", and " << paymentPerMonth << ".\n\n";
+    outFile << "Starting Balance: $" << balance << endl;
+    outFile << "Annual Interest Rate: " << annualRate << endl;
+    outFile << "Monthly Payment: $" << paymentPerMonth << endl << endl;
+     
+    // Write table headers to screen
+    cout << left << setw(10) << "Payment";
+    cout << setw(10) << "Amount";
+    cout << setw(10) << "Interest";
+    cout << setw(10) << "Principal";
+    cout << setw(10) << "Balance" << endl << endl;
+     
+    // Write table headers to output file
+    outFile << left << setw(10) << "Payment";
+    outFile << setw(10) << "Amount";
+    outFile << setw(10) << "Interest";
+    outFile << setw(10) << "Principal";
+    outFile << setw(10) << "Balance" << endl << endl;
+     
+    // Calculate monthly rate by dividing annual rate / 12
+    monthlyRate = annualRate / 12.0;
+     
+    while (balance > 0)
+    {
+ 
+        monthlyInterest = balance * monthlyRate;
+        totalInterest += monthlyInterest;
+         
+        // Correction when monthly payment exceeds balence
+        if (paymentPerMonth > balance)
+        {
+            paymentPerMonth = balance;
+            principal = paymentPerMonth - monthlyInterest;
+            balance -= monthlyInterest + principal;
+             
+        }
+        else
+        {
+            principal = paymentPerMonth - monthlyInterest;
+            balance -= principal;
+        }
+         
+        // Write values to screen
+        cout << fixed << setprecision(2);
+        cout << left << setw(10) << n;
+        cout << setw(10) << paymentPerMonth;
+        cout << setw(10) << monthlyInterest;
+        cout << setw(10) << principal;
+        cout << setw(10) << balance;
+        cout << endl;
+         
+        // Write values to output file
+        outFile << fixed << setprecision(2);
+        outFile << left << setw(10) << n;
+        outFile << setw(10) << paymentPerMonth;
+        outFile << setw(10) << monthlyInterest;
+        outFile << setw(10) << principal;
+        outFile << setw(10) << balance;
+        outFile << endl;
+         
+        // Increment the payment number by 1
+        n++;
+         
+    }
+     
+    cout << endl;
+     
+    // Write number of payments and total interest to screen
+    cout << "\nTotal payments made: " << (n-1) << endl;
+    cout << "Total interest paid: $" <<  totalInterest << endl << endl;
+    cout << "*****************************************************\n\n";
+     
+    // Write number of payments and total interest to output file
+    outFile << "\nTotal payments made: " << (n-1) << "." << endl;
+    outFile << "Total interest paid: $" <<  totalInterest << "." << endl << endl;
+    outFile << "**************************************************\n\n";
+ 
+     
+    return;
+     
+}
